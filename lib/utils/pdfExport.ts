@@ -162,44 +162,75 @@ export function exportHealthRecordToPDF(record: HealthRecord): void {
     pdf.setTextColor(0, 0, 0);
     const lines = record.content.split('\n');
     
-    for (const line of lines) {
+    // Track previous element type for smart spacing
+    let prevElementType: 'header' | 'bullet' | 'numbered' | 'paragraph' | 'empty' | null = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const nextLine = i < lines.length - 1 ? lines[i + 1] : null;
+      
       checkNewPage(10);
       
       // Empty line
       if (line.trim() === '') {
-        yPosition += 5;
+        // Smart spacing based on context
+        if (prevElementType === 'bullet' || prevElementType === 'numbered') {
+          yPosition += 4; // Small gap within lists
+        } else if (prevElementType === 'paragraph') {
+          yPosition += 5; // Medium gap after paragraph
+        } else {
+          yPosition += 3; // Minimal gap
+        }
+        prevElementType = 'empty';
         continue;
       }
       
       // H1 Headers (# )
       if (line.startsWith('# ')) {
-        yPosition += 4; // Space before header
+        // Smart spacing before header
+        if (prevElementType && prevElementType !== 'empty') {
+          yPosition += 6;
+        } else {
+          yPosition += 2;
+        }
         checkNewPage(15);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(18);
         pdf.setTextColor(30, 41, 59); // neutral-800
         const text = line.substring(2).trim();
         pdf.text(text, margin, yPosition);
-        yPosition += 12; // Space after header
+        yPosition += 10; // Space after header
+        prevElementType = 'header';
         continue;
       }
       
       // H2 Headers (## )
       if (line.startsWith('## ')) {
-        yPosition += 3; // Space before header
+        // Smart spacing before header
+        if (prevElementType && prevElementType !== 'empty') {
+          yPosition += 5;
+        } else {
+          yPosition += 2;
+        }
         checkNewPage(12);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(15);
         pdf.setTextColor(51, 65, 85); // neutral-700
         const text = line.substring(3).trim();
         pdf.text(text, margin, yPosition);
-        yPosition += 9; // Space after header
+        yPosition += 8; // Space after header
+        prevElementType = 'header';
         continue;
       }
       
       // H3 Headers (### )
       if (line.startsWith('### ')) {
-        yPosition += 2; // Space before header
+        // Smart spacing before header
+        if (prevElementType && prevElementType !== 'empty') {
+          yPosition += 4;
+        } else {
+          yPosition += 2;
+        }
         checkNewPage(10);
         pdf.setFont('helvetica', 'bold');
         pdf.setFontSize(13);
@@ -207,12 +238,23 @@ export function exportHealthRecordToPDF(record: HealthRecord): void {
         const text = line.substring(4).trim();
         pdf.text(text, margin, yPosition);
         yPosition += 7; // Space after header
+        prevElementType = 'header';
         continue;
       }
       
       // Bullet points (- or *)
       if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
-        checkNewPage(8);
+        checkNewPage(10);
+        
+        // Smart spacing before first bullet or after paragraph
+        if (prevElementType === 'paragraph' || prevElementType === 'header') {
+          yPosition += 3;
+        } else if (prevElementType === 'numbered') {
+          yPosition += 5; // Extra space when switching from numbered to bullet
+        } else if (prevElementType === 'bullet') {
+          yPosition += 4; // Good spacing between bullets
+        }
+        
         pdf.setFontSize(11);
         pdf.setTextColor(0, 0, 0);
         const text = line.trim().substring(2);
@@ -222,38 +264,96 @@ export function exportHealthRecordToPDF(record: HealthRecord): void {
         pdf.circle(margin + 2, yPosition - 1.5, 0.7, 'F');
         
         // Render text with markdown support
-        yPosition = renderTextWithMarkdown(text, margin + 6, yPosition, maxWidth - 6);
-        yPosition += 6; // Space after bullet item
+        const textIndent = margin + 7;
+        const startY = yPosition;
+        yPosition = renderTextWithMarkdown(text, textIndent, yPosition, maxWidth - 7);
+        
+        // Add minimum spacing after text (ensure at least one line was added)
+        const linesRendered = Math.max(1, Math.floor((yPosition - startY) / 5.5) + 1);
+        yPosition = startY + (linesRendered * 5.5);
+        
+        // Check if next line is continuation (bullet or numbered)
+        const isNextBullet = nextLine?.trim().startsWith('- ') || nextLine?.trim().startsWith('* ');
+        const isNextNumbered = nextLine?.match(/^\d+\.\s+/);
+        
+        if (!isNextBullet && !isNextNumbered) {
+          yPosition += 4; // Space after last bullet before different content
+        }
+        
+        prevElementType = 'bullet';
         continue;
       }
       
       // Numbered lists (1. , 2. , etc.)
       const numberedListMatch = line.match(/^(\d+)\.\s+(.+)$/);
       if (numberedListMatch) {
-        checkNewPage(8);
+        checkNewPage(10);
+        
+        // Smart spacing
+        if (prevElementType === 'paragraph' || prevElementType === 'header') {
+          yPosition += 3;
+        } else if (prevElementType === 'bullet') {
+          yPosition += 5; // Extra space when switching from bullet to numbered
+        } else if (prevElementType === 'numbered') {
+          yPosition += 4; // Good spacing between numbered items
+        }
+        
         pdf.setFontSize(11);
         pdf.setTextColor(0, 0, 0);
         const number = numberedListMatch[1];
         const text = numberedListMatch[2];
         
-        // Add number
-        pdf.setFont('helvetica', 'normal');
+        // Add number with better alignment
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(60, 60, 60);
         pdf.text(`${number}.`, margin, yPosition);
         
         // Render text with markdown support
-        yPosition = renderTextWithMarkdown(text, margin + 10, yPosition, maxWidth - 10);
-        yPosition += 6; // Space after list item
+        pdf.setTextColor(0, 0, 0);
+        const textIndent = margin + 11;
+        const startY = yPosition;
+        yPosition = renderTextWithMarkdown(text, textIndent, yPosition, maxWidth - 11);
+        
+        // Add minimum spacing after text (ensure at least one line was added)
+        const linesRendered = Math.max(1, Math.floor((yPosition - startY) / 5.5) + 1);
+        yPosition = startY + (linesRendered * 5.5);
+        
+        // Check if next line is continuation
+        const isNextNumbered = nextLine?.match(/^\d+\.\s+/);
+        const isNextBullet = nextLine?.trim().startsWith('- ') || nextLine?.trim().startsWith('* ');
+        
+        if (!isNextNumbered && !isNextBullet) {
+          yPosition += 4; // Space after last numbered item before different content
+        }
+        
+        prevElementType = 'numbered';
         continue;
       }
       
       // Regular paragraph with markdown support
-      checkNewPage(8);
+      checkNewPage(10);
+      
+      // Smart spacing before paragraph
+      if (prevElementType === 'bullet' || prevElementType === 'numbered') {
+        yPosition += 5; // Extra space after list ends
+      } else if (prevElementType === 'paragraph') {
+        yPosition += 4; // Normal spacing between paragraphs
+      } else if (prevElementType === 'header') {
+        yPosition += 1; // Less space after header (already has space)
+      }
+      
       pdf.setFontSize(11);
       pdf.setTextColor(0, 0, 0);
       
       // Render text with markdown support
+      const startY = yPosition;
       yPosition = renderTextWithMarkdown(line, margin, yPosition, maxWidth);
-      yPosition += 7; // Space after paragraph
+      
+      // Add minimum spacing after text
+      const linesRendered = Math.max(1, Math.floor((yPosition - startY) / 5.5) + 1);
+      yPosition = startY + (linesRendered * 5.5);
+      
+      prevElementType = 'paragraph';
     }
 
     // Footer on all pages
