@@ -1,8 +1,17 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 import { Brain, Home, Plus, FileText, User } from 'lucide-react';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 
-export default function AuthLayout({ children }: { children: ReactNode }) {
+export default async function AuthLayout({ children }: { children: ReactNode }) {
+  // Check authentication
+  const session = await auth();
+  
+  if (!session) {
+    redirect('/login');
+  }
+  
   return (
     <div className="min-h-screen bg-neutral-50">
       {/* Header */}
