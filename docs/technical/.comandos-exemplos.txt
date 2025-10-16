@@ -1,0 +1,291 @@
+═══════════════════════════════════════════════════════════════════════
+  EXEMPLOS DE SAÍDA DOS COMANDOS SIMPLIFICADOS - MEU HUMOR
+═══════════════════════════════════════════════════════════════════════
+
+Este arquivo mostra exemplos de saída dos comandos para que você saiba
+o que esperar ao executá-los.
+
+═══════════════════════════════════════════════════════════════════════
+  1. npm run install:all
+═══════════════════════════════════════════════════════════════════════
+
+$ npm run install:all
+
+> meu-humor-nextjs@0.1.0 install:all
+> npm install && cd backend && npm install
+
+Installing frontend dependencies...
+
+added 426 packages, and audited 444 packages in 15s
+
+152 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+Installing backend dependencies...
+
+added 234 packages, and audited 243 packages in 8s
+
+89 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+✅ All dependencies installed successfully!
+
+═══════════════════════════════════════════════════════════════════════
+  2. npm run dev
+═══════════════════════════════════════════════════════════════════════
+
+$ npm run dev
+
+> meu-humor-nextjs@0.1.0 dev
+> concurrently "npm run dev:backend" "npm run dev:frontend"
+
+[backend] 
+[backend] > backend@1.0.0 dev
+[backend] > nodemon --exec ts-node src/server.ts
+[backend] 
+[backend] [nodemon] 3.0.1
+[backend] [nodemon] to restart at any time, enter `rs`
+[backend] [nodemon] watching path(s): *.*
+[backend] [nodemon] watching extensions: ts,json
+[backend] [nodemon] starting `ts-node src/server.ts`
+[backend] 
+[backend] 🔧 Environment: development
+[backend] 📊 Database: Connected
+[backend] 🔥 Redis: Connected
+[backend] 🤖 Gemini AI: Ready
+[backend] 
+[backend] ✅ Server running on http://localhost:3001
+[backend] 
+[frontend] 
+[frontend] > meu-humor-nextjs@0.1.0 dev:frontend
+[frontend] > next dev --turbopack
+[frontend] 
+[frontend]   ▲ Next.js 15.5.5 (Turbopack)
+[frontend]   - Local:        http://localhost:3000
+[frontend]   - Environments: .env.local
+[frontend] 
+[frontend]  ✓ Starting...
+[frontend]  ✓ Ready in 1.2s
+[frontend]  ○ Compiling / ...
+[frontend]  ✓ Compiled / in 856ms
+[frontend] 
+[frontend] ✓ Compiled in 234ms
+
+AMBOS RODANDO! 🚀
+- Backend: http://localhost:3001
+- Frontend: http://localhost:3000
+
+Para parar: Ctrl+C
+
+═══════════════════════════════════════════════════════════════════════
+  3. npm run dev:backend
+═══════════════════════════════════════════════════════════════════════
+
+$ npm run dev:backend
+
+> meu-humor-nextjs@0.1.0 dev:backend
+> cd backend && npm run dev
+
+> backend@1.0.0 dev
+> nodemon --exec ts-node src/server.ts
+
+[nodemon] 3.0.1
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: ts,json
+[nodemon] starting `ts-node src/server.ts`
+
+🔧 Environment: development
+📊 Database: Connected to PostgreSQL
+🔥 Redis: Connected to Upstash
+🤖 Gemini AI: Ready
+
+✅ Express server running on http://localhost:3001
+
+Available endpoints:
+  POST   /api/auth/register
+  POST   /api/auth/login
+  GET    /api/auth/me
+  GET    /api/mood-entries
+  POST   /api/mood-entries
+  GET    /api/health-records
+  POST   /api/health-records
+  ...
+
+[nodemon] clean exit - waiting for changes before restart
+
+═══════════════════════════════════════════════════════════════════════
+  4. npm run dev:frontend
+═══════════════════════════════════════════════════════════════════════
+
+$ npm run dev:frontend
+
+> meu-humor-nextjs@0.1.0 dev:frontend
+> next dev --turbopack
+
+  ▲ Next.js 15.5.5 (Turbopack)
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Ready in 1.2s
+
+Available routes:
+  ○ / (landing page)
+  ○ /login
+  ○ /home (protected)
+  ○ /registrar (protected)
+  ○ /historico (protected)
+  ○ /prontuarios (protected)
+  ○ /perfil (protected)
+
+ ○ Compiling / ...
+ ✓ Compiled / in 856ms
+
+═══════════════════════════════════════════════════════════════════════
+  LOGS DURANTE DESENVOLVIMENTO
+═══════════════════════════════════════════════════════════════════════
+
+Com "npm run dev" rodando, você verá logs como:
+
+[backend] POST /api/auth/login 200 45ms
+[backend] GET /api/mood-entries 200 123ms
+[frontend]  ○ Compiling /home ...
+[frontend]  ✓ Compiled /home in 234ms
+[backend] POST /api/mood-entries 201 89ms
+[frontend]  GET /home 200 in 56ms
+[backend] GET /api/health-records 200 67ms
+
+Prefixos:
+  [backend]  = Logs do Express
+  [frontend] = Logs do Next.js
+
+═══════════════════════════════════════════════════════════════════════
+  PARANDO OS SERVIDORES
+═══════════════════════════════════════════════════════════════════════
+
+Quando você pressiona Ctrl+C:
+
+^C[backend] 
+[backend] [nodemon] clean exit - waiting for changes before restart
+[frontend] 
+[frontend] ⚠ Gracefully shutting down. Please wait...
+[frontend] ✓ Shutdown complete
+[backend] 
+[backend] 👋 Server stopped
+[backend] Cleaning up connections...
+[backend] ✓ Database disconnected
+[backend] ✓ Redis disconnected
+
+✅ Both servers stopped successfully
+
+═══════════════════════════════════════════════════════════════════════
+  QUANDO VOCÊ MODIFICA UM ARQUIVO
+═══════════════════════════════════════════════════════════════════════
+
+Backend (TypeScript):
+[backend] [nodemon] restarting due to changes...
+[backend] [nodemon] starting `ts-node src/server.ts`
+[backend] ✅ Server running on http://localhost:3001
+
+Frontend (React/Next.js):
+[frontend]  ○ Compiling /home ...
+[frontend]  ✓ Compiled /home in 156ms
+[frontend]  Fast Refresh: Changes applied ⚡
+
+═══════════════════════════════════════════════════════════════════════
+  ERROS COMUNS E MENSAGENS
+═══════════════════════════════════════════════════════════════════════
+
+1. Porta já em uso:
+
+[backend] Error: listen EADDRINUSE: address already in use :::3001
+[backend] 
+[backend] ❌ Port 3001 is already in use
+[backend] 
+[backend] Solutions:
+[backend]   1. Kill the process: lsof -ti:3001 | xargs kill -9
+[backend]   2. Change PORT in backend/.env
+
+2. Banco não conectado:
+
+[backend] ❌ Could not connect to database
+[backend] Error: P1001: Can't reach database server at `localhost:5432`
+[backend] 
+[backend] Check:
+[backend]   1. DATABASE_URL in backend/.env
+[backend]   2. Database is running
+[backend]   3. Credentials are correct
+
+3. API Key inválida:
+
+[backend] ⚠️ GEMINI_API_KEY not set or invalid
+[backend] Health records generation will not work
+[backend] Get key at: https://makersuite.google.com/app/apikey
+
+4. Frontend não encontra backend:
+
+[frontend] ⨯ FetchError: request to http://localhost:3001/api/mood-entries failed
+[frontend] 
+[frontend] Make sure:
+[frontend]   1. Backend is running (npm run dev:backend)
+[frontend]   2. NEXT_PUBLIC_API_URL is correct in .env.local
+
+═══════════════════════════════════════════════════════════════════════
+  COMANDOS ÚTEIS DURANTE O DEV
+═══════════════════════════════════════════════════════════════════════
+
+No terminal onde está rodando os servidores:
+
+  rs              = Reinicia manualmente o backend (nodemon)
+  Ctrl+C          = Para ambos os servidores
+  Ctrl+Z          = Pausa (não recomendado, use Ctrl+C)
+
+═══════════════════════════════════════════════════════════════════════
+  STATUS DE SUCESSO
+═══════════════════════════════════════════════════════════════════════
+
+Quando tudo está funcionando corretamente:
+
+[backend] ✅ Server running on http://localhost:3001
+[frontend] ✓ Ready in 1.2s
+
+Você deve conseguir:
+  ✓ Acessar http://localhost:3000 (landing page)
+  ✓ Fazer login/registro
+  ✓ Ver o dashboard
+  ✓ Registrar humor
+  ✓ Ver histórico
+  ✓ Gerar prontuários
+
+═══════════════════════════════════════════════════════════════════════
+  DOCUMENTAÇÃO ADICIONAL
+═══════════════════════════════════════════════════════════════════════
+
+Para mais informações, consulte:
+
+  • COMANDOS.md         - Referência completa de comandos
+  • EXEMPLO_USO.md      - Casos de uso práticos
+  • SETUP_INSTRUCTIONS  - Setup detalhado passo a passo
+  • QUICK_START.md      - Início rápido
+  • README.md           - Visão geral do projeto
+
+═══════════════════════════════════════════════════════════════════════
+  SUPPORT
+═══════════════════════════════════════════════════════════════════════
+
+Se encontrar problemas não documentados aqui:
+
+  1. Verifique os logs completos acima
+  2. Consulte SETUP_INSTRUCTIONS.md (seção Troubleshooting)
+  3. Verifique as issues no GitHub
+  4. Entre em contato com a equipe de desenvolvimento
+
+═══════════════════════════════════════════════════════════════════════
+
+Última atualização: 2025-10-15
+
