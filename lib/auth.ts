@@ -1,6 +1,9 @@
 import NextAuth, { NextAuthConfig } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { authAPI, setAuthToken } from '@/lib/api-client';
+import { setAuthToken } from '@/lib/api-client';
+import { AuthService } from '@/services/auth.service';
+
+const authService = new AuthService();
 
 interface ExtendedUser {
   id: string;
@@ -26,35 +29,30 @@ export const authConfig: NextAuthConfig = {
         }
 
         try {
-          console.log('📡 [NextAuth] Chamando API de login para:', credentials.email);
+          console.log('📡 [NextAuth] Autenticando usuário:', credentials.email);
           
-          // Call Express backend login endpoint
-          const response = await authAPI.login(
-            credentials.email as string,
-            credentials.password as string
-          );
+          // Call auth service directly (no HTTP request)
+          const response = await authService.login({
+            email: credentials.email as string,
+            password: credentials.password as string,
+          });
 
-          console.log('✅ [NextAuth] Resposta da API:', {
+          console.log('✅ [NextAuth] Usuário autenticado:', {
             hasToken: !!response.token,
             hasUser: !!response.user,
             userId: response.user?.id,
             userEmail: response.user?.email
           });
 
-          if (response.token && response.user) {
-            const userObj = {
-              id: response.user.id,
-              email: response.user.email,
-              isAnonymous: response.user.isAnonymous,
-              accessToken: response.token,
-            };
-            
-            console.log('✅ [NextAuth] Retornando usuário autorizado:', userObj);
-            return userObj;
-          }
-
-          console.log('❌ [NextAuth] Resposta inválida - sem token ou user');
-          return null;
+          const userObj = {
+            id: response.user.id,
+            email: response.user.email,
+            isAnonymous: response.user.isAnonymous,
+            accessToken: response.token,
+          };
+          
+          console.log('✅ [NextAuth] Retornando usuário autorizado');
+          return userObj;
         } catch (error) {
           console.error('❌ [NextAuth] Erro no authorize:', error);
           throw new Error('Email ou senha inválidos');
