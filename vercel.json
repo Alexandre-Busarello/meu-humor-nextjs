@@ -1,14 +1,5 @@
 {
   "buildCommand": "prisma generate && npm run build",
-  "installCommand": "npm install",
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "DIRECT_URL": "@direct_url",
-    "REDIS_URL": "@redis_url",
-    "JWT_SECRET": "@jwt_secret",
-    "GEMINI_API_KEY": "@gemini_api_key",
-    "NEXTAUTH_SECRET": "@nextauth_secret",
-    "NEXTAUTH_URL": "@nextauth_url"
-  }
+  "installCommand": "npm install"
 }
 
