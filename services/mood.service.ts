@@ -135,9 +135,12 @@ export class MoodService {
     
     // Enrich note with AI asynchronously (don't wait for it)
     if (note && note.trim().length > 0) {
+      console.log('📝 [MoodService] Triggering AI enrichment for entry:', entry.id);
       this.enrichNoteWithAI(entry.id, note, score).catch(err => {
-        console.error('Error enriching note with AI:', err);
+        console.error('❌ [MoodService] Error enriching note with AI (async):', err);
       });
+    } else {
+      console.log('📝 [MoodService] Skipping AI enrichment - no note provided');
     }
     
     return entry;
@@ -287,11 +290,18 @@ export class MoodService {
    * Enrich a mood note with AI analysis
    */
   private async enrichNoteWithAI(entryId: string, note: string, score: number): Promise<void> {
+    console.log('🤖 [MoodService] Starting AI enrichment for entry:', entryId);
+    console.log('🤖 [MoodService] Note length:', note.length);
+    console.log('🤖 [MoodService] GEMINI_API_KEY configured:', !!process.env.GEMINI_API_KEY);
+    console.log('🤖 [MoodService] API Key first 10 chars:', process.env.GEMINI_API_KEY?.substring(0, 10));
+    
     try {
       if (!process.env.GEMINI_API_KEY) {
+        console.warn('⚠️ [MoodService] No GEMINI_API_KEY found, skipping AI enrichment');
         return; // Skip if no API key
       }
       
+      console.log('🤖 [MoodService] Creating Gemini model...');
       const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
       
       const moodDescriptions = [
@@ -315,9 +325,13 @@ Expanda esta nota em uma análise complementar mais detalhada e estruturada (má
 
 Use tom empático e profissional. Escreva em primeira pessoa falando com o paciente (use "você"). Use markdown para formatação se necessário.`;
 
+      console.log('🤖 [MoodService] Calling Gemini API...');
       const result = await model.generateContent(prompt);
       const response = await result.response;
       const aiAnalysis = response.text();
+      
+      console.log('🤖 [MoodService] AI analysis generated, length:', aiAnalysis.length);
+      console.log('🤖 [MoodService] Updating database...');
       
       // Update the entry with AI analysis
       await prisma.moodEntry.update({
@@ -325,10 +339,14 @@ Use tom empático e profissional. Escreva em primeira pessoa falando com o pacie
         data: { aiAnalysis },
       });
       
-      console.log(`AI analysis generated for entry ${entryId}`);
+      console.log(`✅ [MoodService] AI analysis successfully generated for entry ${entryId}`);
     } catch (error) {
-      console.error('Error in enrichNoteWithAI:', error);
-      throw error;
+      console.error('❌ [MoodService] Error in enrichNoteWithAI:', error);
+      if (error instanceof Error) {
+        console.error('❌ [MoodService] Error message:', error.message);
+        console.error('❌ [MoodService] Error stack:', error.stack);
+      }
+      // Don't throw - let it fail silently to not block entry creation
     }
   }
   
