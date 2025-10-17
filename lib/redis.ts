@@ -68,7 +68,14 @@ export async function getCached<T>(
   try {
     const cached = await redis.get(key);
     if (cached) {
-      return JSON.parse(cached);
+      // Parse with BigInt support
+      return JSON.parse(cached, (key, value) => {
+        // Try to convert string numbers back to BigInt if they look like timestamps
+        if (typeof value === 'string' && /^\d{13,}$/.test(value)) {
+          return BigInt(value);
+        }
+        return value;
+      });
     }
   } catch (error) {
     console.error('Redis get error:', error);
@@ -77,7 +84,11 @@ export async function getCached<T>(
   const data = await fetcher();
   
   try {
-    await redis.setex(key, ttl, JSON.stringify(data));
+    // Serialize with BigInt support
+    const serialized = JSON.stringify(data, (key, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    );
+    await redis.setex(key, ttl, serialized);
   } catch (error) {
     console.error('Redis set error:', error);
   }
