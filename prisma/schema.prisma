@@ -8,7 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  directUrl = env("DIRECT_URL") // Optional for connection pooling
 }
 
 // ============================================
@@ -270,5 +270,40 @@ model Lead {
   createdAt DateTime @default(now()) @map("created_at")
   
   @@map("leads")
+}
+
+enum PsychologistLeadStatus {
+  NEW
+  CONTACTED
+  DEMO_SCHEDULED
+  DEMO_COMPLETED
+  PROPOSAL_SENT
+  CONVERTED
+  LOST
+}
+
+enum PsychologistLeadSource {
+  WEBSITE
+  REFERRAL
+  SOCIAL_MEDIA
+  OTHER
+}
+
+model PsychologistLead {
+  id        String                   @id @default(uuid())
+  name      String
+  email     String
+  phone     String
+  crp       String?                  // Registro no Conselho Regional de Psicologia
+  message   String?                  @db.Text
+  status    PsychologistLeadStatus   @default(NEW)
+  source    PsychologistLeadSource   @default(WEBSITE)
+  notes     String?                  @db.Text // Notas internas da equipe
+  createdAt DateTime                 @default(now()) @map("created_at")
+  updatedAt DateTime                 @updatedAt @map("updated_at")
+  
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("psychologist_leads")
 }
 

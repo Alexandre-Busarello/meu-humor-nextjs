@@ -12,8 +12,36 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Meu Humor - Acompanhe seu bem-estar mental",
-  description: "Registre seu humor diariamente e receba insights sobre sua saúde mental com IA",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://www.meuhumor.com.br'),
+  title: {
+    default: "Meu Humor - Acompanhe seu bem-estar mental com IA",
+    template: "%s | Meu Humor",
+  },
+  description: "Registre seu humor diariamente, receba insights personalizados e gere prontuários profissionais com inteligência artificial. Cuide da sua saúde mental de forma inteligente.",
+  keywords: [
+    'saúde mental',
+    'diário de humor',
+    'bem-estar',
+    'inteligência artificial',
+    'prontuários',
+    'psicologia',
+    'autoconhecimento',
+    'terapia',
+    'mood tracking',
+  ],
+  authors: [{ name: 'Meu Humor' }],
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://www.meuhumor.com.br',
+    siteName: 'Meu Humor',
+    title: 'Meu Humor - Acompanhe seu bem-estar mental com IA',
+    description: 'Registre seu humor diariamente, receba insights personalizados e gere prontuários profissionais com inteligência artificial.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
