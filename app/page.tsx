@@ -102,7 +102,7 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="container-responsive py-16 md:py-24">
-        <div className="card bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-12">
+        <div className="card bg-gradient-to-r from-primary-500 to-secondary-500 text-white text-center py-12 flex flex-col items-center justify-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Comece a cuidar da sua saúde mental hoje
           </h2>

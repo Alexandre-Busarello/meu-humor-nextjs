@@ -28,6 +28,7 @@ model User {
   // Relations
   moodEntries          MoodEntry[]
   healthRecords        HealthRecord[]
+  generationLogs       GenerationLog[]
   userPlan             UserPlan?
   onboardingData       OnboardingUserData?
   chatSessions         ChatSession[]
@@ -125,6 +126,23 @@ model HealthRecord {
   
   @@index([userId, recordType, createdAt])
   @@map("health_records")
+}
+
+// Log permanente de gerações de prontuários PARCIAL
+// Esta tabela nunca deve ter registros deletados, garantindo que o contador
+// de gerações mensais seja preciso mesmo quando prontuários são excluídos
+model GenerationLog {
+  id              String   @id @default(uuid())
+  userId          String   @map("user_id")
+  recordType      RecordType @default(PARCIAL) @map("record_type")
+  generationMonth String   @map("generation_month") // Format: YYYY-MM
+  healthRecordId  String?  @map("health_record_id") // Reference (can be null if record deleted)
+  createdAt       DateTime @default(now()) @map("created_at")
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId, generationMonth])
+  @@map("generation_logs")
 }
 
 // ============================================

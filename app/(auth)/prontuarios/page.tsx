@@ -329,7 +329,7 @@ export default function HealthRecordsPage() {
         </h2>
 
         {parcialRecords.length === 0 ? (
-          <div className="card text-center py-12">
+          <div className="card text-center py-12 flex flex-col items-center justify-center">
             <FileText className="h-16 w-16 text-neutral-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-neutral-800 mb-2">
               Nenhum prontuário parcial encontrado

@@ -123,7 +123,9 @@ export class HealthRecordService {
    * Get count of PARCIAL records generated in a specific month
    */
   private async getMonthlyGenerationCount(userId: string, month: string): Promise<number> {
-    return prisma.healthRecord.count({
+    // Count from GenerationLog instead of HealthRecord to maintain accurate count
+    // even when records are deleted by user
+    return prisma.generationLog.count({
       where: {
         userId,
         recordType: 'PARCIAL',
@@ -240,16 +242,31 @@ export class HealthRecordService {
     // Get current month for tracking
     const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
     
-    // Create PARCIAL health record
-    const record = await prisma.healthRecord.create({
-      data: {
-        userId,
-        content,
-        timestamp: BigInt(Date.now()),
-        recordType: 'PARCIAL',
-        moodEntryIds: unusedMoods.map(m => m.id),
-        generationMonth: currentMonth,
-      },
+    // Create PARCIAL health record and log the generation
+    const record = await prisma.$transaction(async (tx) => {
+      // Create the health record
+      const newRecord = await tx.healthRecord.create({
+        data: {
+          userId,
+          content,
+          timestamp: BigInt(Date.now()),
+          recordType: 'PARCIAL',
+          moodEntryIds: unusedMoods.map(m => m.id),
+          generationMonth: currentMonth,
+        },
+      });
+      
+      // Create permanent generation log entry (never deleted)
+      await tx.generationLog.create({
+        data: {
+          userId,
+          recordType: 'PARCIAL',
+          generationMonth: currentMonth,
+          healthRecordId: newRecord.id,
+        },
+      });
+      
+      return newRecord;
     });
     
     // Update or create GLOBAL record
