@@ -24,11 +24,18 @@ export class MoodService {
   private genAI: GoogleGenerativeAI;
   
   constructor() {
+    console.log('🔧 [MoodService] Initializing MoodService');
     const apiKey = process.env.GEMINI_API_KEY;
+    console.log('🔧 [MoodService] GEMINI_API_KEY exists:', !!apiKey);
+    console.log('🔧 [MoodService] GEMINI_API_KEY length:', apiKey?.length);
+    console.log('🔧 [MoodService] GEMINI_API_KEY first 10 chars:', apiKey?.substring(0, 10));
+    console.log('🔧 [MoodService] All env vars starting with GEMINI:', Object.keys(process.env).filter(k => k.startsWith('GEMINI')));
+    
     if (!apiKey) {
-      console.warn('GEMINI_API_KEY not configured. AI enrichment will be disabled.');
+      console.warn('⚠️ [MoodService] GEMINI_API_KEY not configured. AI enrichment will be disabled.');
     }
     this.genAI = new GoogleGenerativeAI(apiKey || '');
+    console.log('✅ [MoodService] GoogleGenerativeAI initialized');
   }
   /**
    * Get all mood entries for a user
