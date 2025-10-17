@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://meuhumor.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.meuhumor.com.br';
   
   // Data de última modificação (você pode tornar isso dinâmico no futuro)
   const lastModified = new Date();
