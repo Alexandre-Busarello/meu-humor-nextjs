@@ -147,7 +147,7 @@ export class MoodService {
       // Wait for AI enrichment with timeout (don't block forever)
       const enrichmentPromise = this.enrichNoteWithAI(entry.id, note, score);
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('AI enrichment timeout')), 40000) // 40 seconds timeout
+        setTimeout(() => reject(new Error('AI enrichment timeout')), 40000) // 40 secondgits timeout
       );
       
       try {
@@ -331,7 +331,7 @@ export class MoodService {
       }
       
       console.log('🤖 [MoodService] Creating Gemini model...');
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
       
       const moodDescriptions = [
         'muito mal',

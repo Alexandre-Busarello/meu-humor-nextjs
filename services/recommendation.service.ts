@@ -75,7 +75,7 @@ export class RecommendationService {
         return this.getStaticRecommendation(entries.length);
       }
       
-      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
+      const model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite' });
       
       // Prepare mood summary
       const scores = entries.map(e => e.score);
