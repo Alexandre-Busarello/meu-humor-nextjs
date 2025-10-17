@@ -140,12 +140,23 @@ export class MoodService {
     // Invalidate cache
     await this.invalidateUserCache(userId);
     
-    // Enrich note with AI asynchronously (don't wait for it)
+    // Enrich note with AI - wait for it but with timeout
     if (note && note.trim().length > 0) {
-      console.log('📝 [MoodService] Triggering AI enrichment for entry:', entry.id);
-      this.enrichNoteWithAI(entry.id, note, score).catch(err => {
-        console.error('❌ [MoodService] Error enriching note with AI (async):', err);
-      });
+      console.log('📝 [MoodService] Starting AI enrichment for entry:', entry.id);
+      
+      // Wait for AI enrichment with timeout (don't block forever)
+      const enrichmentPromise = this.enrichNoteWithAI(entry.id, note, score);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI enrichment timeout')), 40000) // 40 seconds timeout
+      );
+      
+      try {
+        await Promise.race([enrichmentPromise, timeoutPromise]);
+        console.log('✅ [MoodService] AI enrichment completed within timeout');
+      } catch (err) {
+        console.error('⚠️ [MoodService] AI enrichment failed or timed out (non-blocking):', err);
+        // Don't throw - entry was already created
+      }
     } else {
       console.log('📝 [MoodService] Skipping AI enrichment - no note provided');
     }
@@ -193,15 +204,26 @@ export class MoodService {
     // Invalidate cache
     await this.invalidateUserCache(userId);
     
-    // Regenerate AI analysis asynchronously if score or note changed
+    // Regenerate AI analysis if score or note changed - wait for it with timeout
     if ((scoreChanged || noteChanged) && entry.note && entry.note.trim().length > 0) {
       const newScore = data.score !== undefined ? data.score : currentEntry.score;
       const newNote = data.note !== undefined ? data.note : currentEntry.note;
       
       console.log(`🤖 Regenerating AI analysis for entry ${entryId}`);
-      this.enrichNoteWithAI(entry.id, newNote, newScore).catch(err => {
-        console.error('Error regenerating AI analysis:', err);
-      });
+      
+      // Wait for AI enrichment with timeout
+      const enrichmentPromise = this.enrichNoteWithAI(entry.id, newNote, newScore);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI enrichment timeout')), 25000) // 25s timeout
+      );
+      
+      try {
+        await Promise.race([enrichmentPromise, timeoutPromise]);
+        console.log('✅ [MoodService] AI enrichment completed within timeout (update)');
+      } catch (err) {
+        console.error('⚠️ [MoodService] AI enrichment failed or timed out (update, non-blocking):', err);
+        // Don't throw - entry was already updated
+      }
     }
     
     return entry;
